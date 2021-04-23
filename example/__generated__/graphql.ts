@@ -22,6 +22,13 @@ export type Author = {
   id?: Maybe<Scalars['ID']>;
   name?: Maybe<Scalars['String']>;
   friends?: Maybe<Array<Maybe<Author>>>;
+  friendsPaginated?: Maybe<Array<Maybe<Author>>>;
+};
+
+
+export type AuthorFriendsPaginatedArgs = {
+  from: Scalars['Int'];
+  limit: Scalars['Int'];
 };
 
 export enum CacheControlScope {
@@ -67,6 +74,13 @@ export type Query = {
   __typename?: 'Query';
   todos?: Maybe<Array<Maybe<Todo>>>;
   messages?: Maybe<Array<Maybe<Scalars['String']>>>;
+  messagesPaginated?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+
+export type QueryMessagesPaginatedArgs = {
+  from: Scalars['Int'];
+  limit: Scalars['Int'];
 };
 
 export type Todo = {
@@ -159,13 +173,13 @@ export type ResolversTypes = {
   Author: ResolverTypeWrapper<Author>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  Int: ResolverTypeWrapper<Scalars['Int']>;
   CacheControlScope: CacheControlScope;
   Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   Todo: ResolverTypeWrapper<Todo>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Upload: ResolverTypeWrapper<Scalars['Upload']>;
-  Int: ResolverTypeWrapper<Scalars['Int']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -173,12 +187,12 @@ export type ResolversParentTypes = {
   Author: Author;
   ID: Scalars['ID'];
   String: Scalars['String'];
+  Int: Scalars['Int'];
   Mutation: {};
   Query: {};
   Todo: Todo;
   Boolean: Scalars['Boolean'];
   Upload: Scalars['Upload'];
-  Int: Scalars['Int'];
 };
 
 export type CacheControlDirectiveArgs = {   maxAge?: Maybe<Scalars['Int']>;
@@ -190,6 +204,7 @@ export type AuthorResolvers<ContextType = any, ParentType extends ResolversParen
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   friends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Author']>>>, ParentType, ContextType>;
+  friendsPaginated?: Resolver<Maybe<Array<Maybe<ResolversTypes['Author']>>>, ParentType, ContextType, RequireFields<AuthorFriendsPaginatedArgs, 'from' | 'limit'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -204,6 +219,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   todos?: Resolver<Maybe<Array<Maybe<ResolversTypes['Todo']>>>, ParentType, ContextType>;
   messages?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  messagesPaginated?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType, RequireFields<QueryMessagesPaginatedArgs, 'from' | 'limit'>>;
 };
 
 export type TodoResolvers<ContextType = any, ParentType extends ResolversParentTypes['Todo'] = ResolversParentTypes['Todo']> = {
@@ -280,10 +296,12 @@ export type GraphCacheResolvers = {
     id?: Resolver<Author, Maybe<Scalars['ID']>, null>
     name?: Resolver<Author, Maybe<Scalars['String']>, null>
     friends?: Resolver<Author, Maybe<Array<Maybe<Author>>>, null>
+    friendsPaginated?: Resolver<Author, Maybe<Array<Maybe<Author>>>, AuthorFriendsPaginatedArgs>
   }
   Query?: {
     todos?: Resolver<Query, Maybe<Array<Maybe<Todo>>>, null>
     messages?: Resolver<Query, Maybe<Array<Maybe<Scalars['String']>>>, null>
+    messagesPaginated?: Resolver<Query, Maybe<Array<Maybe<Scalars['String']>>>, QueryMessagesPaginatedArgs>
   }
   Todo?: {
     id?: Resolver<Todo, Maybe<Scalars['ID']>, null>

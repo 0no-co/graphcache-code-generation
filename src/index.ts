@@ -85,7 +85,7 @@ function getResolversConfig(schema: GraphQLSchema) {
     if (parentType.astNode?.kind !== Kind.OBJECT_TYPE_DEFINITION) return;
     const fields = [];
     parentType.astNode.fields.forEach(function (field) {
-      const argsName = field.arguments && field.arguments.length ? `Mutation${capitalize(field.name.value)}Args` : 'null';
+      const argsName = field.arguments && field.arguments.length ? `${parentType.name}${capitalize(field.name.value)}Args` : 'null';
       const type = unwrapType(field.type); 
       fields.push(`${field.name.value}?: Resolver<${parentType.name}, ${constructType(type)}, ${argsName}>`);
     });

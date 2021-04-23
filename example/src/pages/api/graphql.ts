@@ -25,6 +25,7 @@ const typeDefs = gql`
   type Query {
     todos: [Todo]
     messages: [String]
+    messagesPaginated(from: Int! limit: Int!): [String]
   }
 
   type Mutation {
@@ -39,6 +40,7 @@ const typeDefs = gql`
     id: ID
     name: String
     friends: [Author]
+    friendsPaginated(from: Int! limit: Int!): [Author]
   }
 
   type Todo {
