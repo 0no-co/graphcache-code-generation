@@ -16,12 +16,12 @@ type ResolverResult =
   | null
   | undefined;
 
-export type GraphCacheResolver<ParentData = Data, ResolverVariables = Variables> = (
+export type GraphCacheResolver<ParentData = Data, FieldData = ResolverResult, ResolverVariables = Variables> = (
   parent: ParentData,
   args: ResolverVariables,
   cache: Cache,
   info: ResolveInfo
-) => ResolverResult;
+) => FieldData;
 
 export type GraphCacheUpdateResolver<ResultData = Data, UpdateVariables = Variables> = (
   result: ResultData,

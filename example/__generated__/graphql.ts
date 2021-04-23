@@ -249,12 +249,12 @@ type ResolverResult =
   | null
   | undefined;
 
-export type GraphCacheResolver<ParentData = Data, ResolverVariables = Variables> = (
+export type GraphCacheResolver<ParentData = Data, FieldData = ResolverResult, ResolverVariables = Variables> = (
   parent: ParentData,
   args: ResolverVariables,
   cache: Cache,
   info: ResolveInfo
-) => ResolverResult;
+) => FieldData;
 
 export type GraphCacheUpdateResolver<ResultData = Data, UpdateVariables = Variables> = (
   result: ResultData,
@@ -271,10 +271,27 @@ export type GraphCacheOptimisticMutationResolver<ResultData = Data, UpdateVariab
 
 
 export type GraphCacheKeysConfig = {
-  Author: (data: Author) => null | string
-  Todo: (data: Todo) => null | string
+  Author?: (data: Author) => null | string
+  Todo?: (data: Todo) => null | string
 }
   
+export type GraphCacheResolvers = {
+  Author?: {
+    id?: Resolver<Author, Maybe<Scalars['ID']>, null>
+    name?: Resolver<Author, Maybe<Scalars['String']>, null>
+    friends?: Resolver<Author, Maybe<Array<Maybe<Author>>>, null>
+  }
+  Query?: {
+    todos?: Resolver<Query, Maybe<Array<Maybe<Todo>>>, null>
+    messages?: Resolver<Query, Maybe<Array<Maybe<Scalars['String']>>>, null>
+  }
+  Todo?: {
+    id?: Resolver<Todo, Maybe<Scalars['ID']>, null>
+    text?: Resolver<Todo, Maybe<Scalars['String']>, null>
+    complete?: Resolver<Todo, Maybe<Scalars['Boolean']>, null>
+    author?: Resolver<Todo, Maybe<Author>, null>
+  }
+}
 export type GraphCacheOptimisticUpdaters = {
   toggleTodo?: GraphCacheOptimisticMutationResolver<MutationToggleTodoArgs>
   toggleTodos?: GraphCacheOptimisticMutationResolver<MutationToggleTodosArgs>
@@ -283,7 +300,7 @@ export type GraphCacheOptimisticUpdaters = {
   toggleTodosOptional?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalArgs>
 }
 export type GraphCacheUpdaters = {
-  Mutation: {
+  Mutation?: {
     toggleTodo?: GraphCacheUpdateResolver<Todo, MutationToggleTodoArgs>
     toggleTodos?: GraphCacheUpdateResolver<Array<Todo>, MutationToggleTodosArgs>
     toggleTodosOptionalArray?: GraphCacheUpdateResolver<Maybe<Array<Todo>>, MutationToggleTodosOptionalArrayArgs>

@@ -28,7 +28,8 @@ function constructType(typeNode: TypeNode, nullable: boolean = true): string {
       return nullable ? `Maybe<Array<${constructType(typeNode.type)}>>` : `Array<${constructType(typeNode.type)}>`
     }
     case 'NamedType': {
-      return nullable ? `Maybe<${typeNode.name.value}>` : typeNode.name.value;
+      const type = baseTypes.includes(typeNode.name.value) ? `Scalars['${typeNode.name.value}']` : typeNode.name.value;
+      return nullable ? `Maybe<${type}>` : type;
     }
     case 'NonNullType': {
       return constructType(typeNode.type, false)
@@ -56,7 +57,7 @@ function getKeysConfig(schema: GraphQLSchema) {
     const type = typeMap[key];
     if (type.astNode?.kind !== Kind.OBJECT_TYPE_DEFINITION) return;
 
-    keys.push(`${type.name}: (data: ${type.name}) => null | string`)
+    keys.push(`${type.name}?: (data: ${type.name}) => null | string`)
   });
 
   return `
@@ -80,11 +81,21 @@ function getResolversConfig(schema: GraphQLSchema) {
   Object.keys(typeMap).forEach(function (key) {
     if (!isValidType(key)) return;
 
-    const type = typeMap[key];
-    if (type.astNode?.kind !== Kind.OBJECT_TYPE_DEFINITION) return;
+    const parentType = typeMap[key];
+    if (parentType.astNode?.kind !== Kind.OBJECT_TYPE_DEFINITION) return;
+    const fields = [];
+    parentType.astNode.fields.forEach(function (field) {
+      const argsName = field.arguments && field.arguments.length ? `Mutation${capitalize(field.name.value)}Args` : 'null';
+      const type = unwrapType(field.type); 
+      fields.push(`${field.name.value}?: Resolver<${parentType.name}, ${constructType(type)}, ${argsName}>`);
+    });
 
-    // TODO: use type and traverse its types
+    resolvers.push(`${parentType.name}?: {
+    ${fields.join('\n    ')}
+  }`)
   });
+
+  return resolvers;
 }
 
 function getSubscriptionUpdatersConfig(typemap: TypeMap, subscriptionName: string) {
@@ -139,13 +150,12 @@ export const plugin: PluginFunction<
   UrqlGraphCacheConfig,
   Types.ComplexPluginOutput
 > = (schema: GraphQLSchema) => {
-  const queryName = schema.getQueryType()?.name;
   const mutationName = schema.getMutationType()?.name;
   const subscriptionsName = schema.getSubscriptionType()?.name;
 
   const typeMap = schema.getTypeMap();
   const keys = getKeysConfig(schema);
-  // const resolvers = getResolversConfig(typeMap, queryName);
+  const resolvers = getResolversConfig(schema);
   let mutationUpdaters, subscriptionUpaters, optimisticUpdaters;
   if (mutationName) {
     mutationUpdaters = getMutationUpdaterConfig(typeMap, mutationName);
@@ -161,13 +171,16 @@ export const plugin: PluginFunction<
     content: [
       legacyWrapper,
       keys,
+      `export type GraphCacheResolvers = {
+  ${resolvers.join('\n  ')}
+}`,
       mutationName && `export type GraphCacheOptimisticUpdaters = {
   ${optimisticUpdaters.join('\n  ')}
 }`,
       mutationName || subscriptionsName ? `export type GraphCacheUpdaters = {
-  ${mutationName ? `Mutation: {
+  ${mutationName ? `Mutation?: {
     ${mutationUpdaters.join('\n    ')}
-  }` : ''}${subscriptionsName ? `Subscription: {
+  }` : ''}${subscriptionsName ? `Subscription?: {
     ${subscriptionUpaters.join('\n    ')}
   }` : ''}
 }` : null,
