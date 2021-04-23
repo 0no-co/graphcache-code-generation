@@ -150,8 +150,7 @@ export const plugin: PluginFunction<
       mutationName || subscriptionsName ? `export type GraphCacheUpdaters = {
   ${mutationName ? `Mutation: {
     ${mutationUpdaters.join('\n')}
-}` : ''}
-  ${subscriptionsName ? `Subscription: {
+  }` : ''}${subscriptionsName ? `Subscription: {
     ${subscriptionUpaters.join('\n')}
   }` : ''}
 }` : null,

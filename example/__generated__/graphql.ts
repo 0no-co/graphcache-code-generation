@@ -206,6 +206,5 @@ export type GraphCacheOptimisticUpdaters = {
 export type GraphCacheUpdaters = {
   Mutation: {
     toggleTodo?: GraphCacheUpdateResolver<Todo, MutationToggleTodoArgs>
-}
-  undefined
+  }
 }
