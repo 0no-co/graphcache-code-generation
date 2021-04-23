@@ -1,19 +1,19 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
 import {
   GraphQLSchema,
-  GraphQLOutputType,
   isWrappingType,
   Kind,
-  GraphQLWrappingType
+  GraphQLWrappingType,
+  TypeNode,
 } from "graphql";
 import { TypeMap } from "graphql/type/schema";
 import { UrqlGraphCacheConfig } from "./config";
 import { baseTypes, legacyImports, legacyWrapper } from './constants';
 
-type GraphQLFlatType = Exclude<GraphQLOutputType, GraphQLWrappingType>;
+type GraphQLFlatType = Exclude<TypeNode, GraphQLWrappingType>;
 
-export const unwrapType = (
-  type: null | undefined | GraphQLOutputType
+const unwrapType = (
+  type: null | undefined | TypeNode
 ): GraphQLFlatType | null => {
   if (isWrappingType(type)) {
     return unwrapType(type.ofType);
@@ -21,6 +21,21 @@ export const unwrapType = (
 
   return type || null;
 };
+
+function constructType(typeNode: TypeNode, nullable: boolean = true): string {
+  switch(typeNode.kind) {
+    case 'ListType': {
+      return nullable ? `Maybe<Array<${constructType(typeNode.type)}>>` : `Array<${constructType(typeNode.type)}>`
+    }
+    case 'NamedType': {
+      return nullable ? `Maybe<${typeNode.name.value}>` : typeNode.name.value;
+    }
+    case 'NonNullType': {
+      return constructType(typeNode.type, false)
+    }
+  }
+}
+
 const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
 
 function getKeysConfig(schema: GraphQLSchema) {
@@ -46,7 +61,7 @@ function getKeysConfig(schema: GraphQLSchema) {
 
   return `
 export type GraphCacheKeysConfig = {
-  ${keys.join('\n')}
+  ${keys.join('\n  ')}
 }
   `;
 }
@@ -80,10 +95,9 @@ function getSubscriptionUpdatersConfig(typemap: TypeMap, subscriptionName: strin
     const { fields } = subscriptionType.astNode;
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
-      // TODO: we should unwrap here.
-      if (fieldNode.type.kind !== Kind.NAMED_TYPE) return;
+      const type = unwrapType(fieldNode.type);
 
-      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<${fieldNode.type.name.value}, ${argsName}>`);
+      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<${constructType(type)}, ${argsName}>`);
     });
   }
 
@@ -98,10 +112,8 @@ function getMutationUpdaterConfig(typemap: TypeMap, mutationName: string) {
     const { fields } = mutationType.astNode;
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
-      // TODO: temp
-      if (fieldNode.type.kind !== Kind.NAMED_TYPE) return;
-
-      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<${fieldNode.type.name.value}, ${argsName}>`);
+      const type = unwrapType(fieldNode.type); 
+      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<${constructType(type)}, ${argsName}>`);
     });
   }
 
@@ -116,9 +128,6 @@ function getOptimisticUpdatersConfig(typemap: TypeMap, mutationName: string) {
     const { fields } = mutationType.astNode;
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
-      // TODO: temp
-      if (fieldNode.type.kind !== Kind.NAMED_TYPE) return;
-
       optimistic.push(`${fieldNode.name.value}?: GraphCacheOptimisticMutationResolver<${argsName}>`);
     });
   }
@@ -153,13 +162,13 @@ export const plugin: PluginFunction<
       legacyWrapper,
       keys,
       mutationName && `export type GraphCacheOptimisticUpdaters = {
-  ${optimisticUpdaters.join('\n')}
+  ${optimisticUpdaters.join('\n  ')}
 }`,
       mutationName || subscriptionsName ? `export type GraphCacheUpdaters = {
   ${mutationName ? `Mutation: {
-    ${mutationUpdaters.join('\n')}
+    ${mutationUpdaters.join('\n    ')}
   }` : ''}${subscriptionsName ? `Subscription: {
-    ${subscriptionUpaters.join('\n')}
+    ${subscriptionUpaters.join('\n    ')}
   }` : ''}
 }` : null,
     ].filter(Boolean).join('\n'),

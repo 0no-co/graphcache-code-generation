@@ -17,6 +17,13 @@ export type Scalars = {
 };
 
 
+export type Author = {
+  __typename?: 'Author';
+  id?: Maybe<Scalars['ID']>;
+  name?: Maybe<Scalars['String']>;
+  friends?: Maybe<Array<Maybe<Author>>>;
+};
+
 export enum CacheControlScope {
   Public = 'PUBLIC',
   Private = 'PRIVATE'
@@ -24,12 +31,36 @@ export enum CacheControlScope {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  toggleTodo?: Maybe<Todo>;
+  toggleTodo: Todo;
+  toggleTodos: Array<Todo>;
+  toggleTodosOptionalArray?: Maybe<Array<Todo>>;
+  toggleTodosOptionalEntity: Array<Maybe<Todo>>;
+  toggleTodosOptional?: Maybe<Array<Maybe<Todo>>>;
 };
 
 
 export type MutationToggleTodoArgs = {
   id: Scalars['ID'];
+};
+
+
+export type MutationToggleTodosArgs = {
+  id: Array<Scalars['ID']>;
+};
+
+
+export type MutationToggleTodosOptionalArrayArgs = {
+  id: Array<Scalars['ID']>;
+};
+
+
+export type MutationToggleTodosOptionalEntityArgs = {
+  id: Array<Scalars['ID']>;
+};
+
+
+export type MutationToggleTodosOptionalArgs = {
+  id: Array<Scalars['ID']>;
 };
 
 export type Query = {
@@ -43,6 +74,7 @@ export type Todo = {
   id?: Maybe<Scalars['ID']>;
   text?: Maybe<Scalars['String']>;
   complete?: Maybe<Scalars['Boolean']>;
+  author?: Maybe<Author>;
 };
 
 
@@ -124,11 +156,12 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  Author: ResolverTypeWrapper<Author>;
+  ID: ResolverTypeWrapper<Scalars['ID']>;
+  String: ResolverTypeWrapper<Scalars['String']>;
   CacheControlScope: CacheControlScope;
   Mutation: ResolverTypeWrapper<{}>;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
   Query: ResolverTypeWrapper<{}>;
-  String: ResolverTypeWrapper<Scalars['String']>;
   Todo: ResolverTypeWrapper<Todo>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Upload: ResolverTypeWrapper<Scalars['Upload']>;
@@ -137,10 +170,11 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  Mutation: {};
+  Author: Author;
   ID: Scalars['ID'];
-  Query: {};
   String: Scalars['String'];
+  Mutation: {};
+  Query: {};
   Todo: Todo;
   Boolean: Scalars['Boolean'];
   Upload: Scalars['Upload'];
@@ -152,8 +186,19 @@ export type CacheControlDirectiveArgs = {   maxAge?: Maybe<Scalars['Int']>;
 
 export type CacheControlDirectiveResolver<Result, Parent, ContextType = any, Args = CacheControlDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
+export type AuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['Author'] = ResolversParentTypes['Author']> = {
+  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  friends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Author']>>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  toggleTodo?: Resolver<Maybe<ResolversTypes['Todo']>, ParentType, ContextType, RequireFields<MutationToggleTodoArgs, 'id'>>;
+  toggleTodo?: Resolver<ResolversTypes['Todo'], ParentType, ContextType, RequireFields<MutationToggleTodoArgs, 'id'>>;
+  toggleTodos?: Resolver<Array<ResolversTypes['Todo']>, ParentType, ContextType, RequireFields<MutationToggleTodosArgs, 'id'>>;
+  toggleTodosOptionalArray?: Resolver<Maybe<Array<ResolversTypes['Todo']>>, ParentType, ContextType, RequireFields<MutationToggleTodosOptionalArrayArgs, 'id'>>;
+  toggleTodosOptionalEntity?: Resolver<Array<Maybe<ResolversTypes['Todo']>>, ParentType, ContextType, RequireFields<MutationToggleTodosOptionalEntityArgs, 'id'>>;
+  toggleTodosOptional?: Resolver<Maybe<Array<Maybe<ResolversTypes['Todo']>>>, ParentType, ContextType, RequireFields<MutationToggleTodosOptionalArgs, 'id'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
@@ -165,6 +210,7 @@ export type TodoResolvers<ContextType = any, ParentType extends ResolversParentT
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   text?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   complete?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  author?: Resolver<Maybe<ResolversTypes['Author']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -173,6 +219,7 @@ export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 }
 
 export type Resolvers<ContextType = any> = {
+  Author?: AuthorResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Todo?: TodoResolvers<ContextType>;
@@ -224,14 +271,23 @@ export type GraphCacheOptimisticMutationResolver<ResultData = Data, UpdateVariab
 
 
 export type GraphCacheKeysConfig = {
+  Author: (data: Author) => null | string
   Todo: (data: Todo) => null | string
 }
   
 export type GraphCacheOptimisticUpdaters = {
   toggleTodo?: GraphCacheOptimisticMutationResolver<MutationToggleTodoArgs>
+  toggleTodos?: GraphCacheOptimisticMutationResolver<MutationToggleTodosArgs>
+  toggleTodosOptionalArray?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalArrayArgs>
+  toggleTodosOptionalEntity?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalEntityArgs>
+  toggleTodosOptional?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalArgs>
 }
 export type GraphCacheUpdaters = {
   Mutation: {
     toggleTodo?: GraphCacheUpdateResolver<Todo, MutationToggleTodoArgs>
+    toggleTodos?: GraphCacheUpdateResolver<Array<Todo>, MutationToggleTodosArgs>
+    toggleTodosOptionalArray?: GraphCacheUpdateResolver<Maybe<Array<Todo>>, MutationToggleTodosOptionalArrayArgs>
+    toggleTodosOptionalEntity?: GraphCacheUpdateResolver<Array<Maybe<Todo>>, MutationToggleTodosOptionalEntityArgs>
+    toggleTodosOptional?: GraphCacheUpdateResolver<Maybe<Array<Maybe<Todo>>>, MutationToggleTodosOptionalArgs>
   }
 }

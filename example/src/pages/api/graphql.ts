@@ -28,13 +28,24 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    toggleTodo(id: ID!): Todo
+    toggleTodo(id: ID!): Todo!
+    toggleTodos(id: [ID!]!): [Todo!]!
+    toggleTodosOptionalArray(id: [ID!]!): [Todo!]
+    toggleTodosOptionalEntity(id: [ID!]!): [Todo]!
+    toggleTodosOptional(id: [ID!]!): [Todo]
+  }
+
+  type Author {
+    id: ID
+    name: String
+    friends: [Author]
   }
 
   type Todo {
     id: ID
     text: String
     complete: Boolean
+    author: Author
   }
 `;
 
