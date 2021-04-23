@@ -148,12 +148,12 @@ export const plugin: PluginFunction<
   ${optimisticUpdaters.join('\n')}
 }`,
       mutationName || subscriptionsName ? `export type GraphCacheUpdaters = {
-  ${mutationName && `Mutation: {
+  ${mutationName ? `Mutation: {
     ${mutationUpdaters.join('\n')}
-}`}
-  ${subscriptionsName && `Mutation: {
+}` : ''}
+  ${subscriptionsName ? `Subscription: {
     ${subscriptionUpaters.join('\n')}
-  }`}
+  }` : ''}
 }` : null,
     ].filter(Boolean).join('\n'),
   };
