@@ -8,16 +8,20 @@ import {
 } from "graphql";
 import { TypeMap } from "graphql/type/schema";
 import { UrqlGraphCacheConfig } from "./config";
+import { baseTypes, legacyImports, legacyWrapper } from './constants';
 
 type GraphQLFlatType = Exclude<GraphQLOutputType, GraphQLWrappingType>;
 
-const baseTypes = [
-  'Int',
-  'String',
-  'Boolean',
-  'Float',
-  'ID',
-];
+export const unwrapType = (
+  type: null | undefined | GraphQLOutputType
+): GraphQLFlatType | null => {
+  if (isWrappingType(type)) {
+    return unwrapType(type.ofType);
+  }
+
+  return type || null;
+};
+const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
 
 function getKeysConfig(schema: GraphQLSchema) {
   const keys = [];
@@ -47,8 +51,25 @@ export type GraphCacheKeysConfig = {
   `;
 }
 
-function getResolversConfig() {
-  const queries = [];
+function getResolversConfig(schema: GraphQLSchema) {
+  const resolvers = [];
+
+  const roots = [
+    schema.getMutationType()?.name,
+    schema.getSubscriptionType()?.name,
+  ].filter(Boolean);
+
+  const typeMap = schema.getTypeMap();
+  const isValidType = (type: string) => !roots.includes(type) && !type.startsWith('__') && !baseTypes.includes(type);
+
+  Object.keys(typeMap).forEach(function (key) {
+    if (!isValidType(key)) return;
+
+    const type = typeMap[key];
+    if (type.astNode?.kind !== Kind.OBJECT_TYPE_DEFINITION) return;
+
+    // TODO: use type and traverse its types
+  });
 }
 
 function getSubscriptionUpdatersConfig(typemap: TypeMap, subscriptionName: string) {
@@ -59,7 +80,7 @@ function getSubscriptionUpdatersConfig(typemap: TypeMap, subscriptionName: strin
     const { fields } = subscriptionType.astNode;
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
-      // TODO: temp
+      // TODO: we should unwrap here.
       if (fieldNode.type.kind !== Kind.NAMED_TYPE) return;
 
       updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<${fieldNode.type.name.value}, ${argsName}>`);
@@ -68,18 +89,6 @@ function getSubscriptionUpdatersConfig(typemap: TypeMap, subscriptionName: strin
 
   return updaters;
 }
-
-export const unwrapType = (
-  type: null | undefined | GraphQLOutputType
-): GraphQLFlatType | null => {
-  if (isWrappingType(type)) {
-    return unwrapType(type.ofType);
-  }
-
-  return type || null;
-};
-
-const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
 
 function getMutationUpdaterConfig(typemap: TypeMap, mutationName: string) {
   const updaters = [];
@@ -139,10 +148,9 @@ export const plugin: PluginFunction<
   }
 
   return {
-    prepend: [
-      `import { Resolver as GraphCacheResolver, UpdateResolver as GraphCacheUpdateResolver, OptimisticMutationResolver as GraphCacheOptimisticMutationResolver } from '@urql/exchange-graphcache';`,
-    ],
+    prepend: [legacyImports],
     content: [
+      legacyWrapper,
       keys,
       mutationName && `export type GraphCacheOptimisticUpdaters = {
   ${optimisticUpdaters.join('\n')}

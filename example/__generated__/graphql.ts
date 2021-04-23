@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { Resolver as GraphCacheResolver, UpdateResolver as GraphCacheUpdateResolver, OptimisticMutationResolver as GraphCacheOptimisticMutationResolver } from '@urql/exchange-graphcache';
+import { Cache, ResolveInfo, Data, Variables, NullArray, DataField, DataFields } from '@urql/exchange-graphcache';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -195,6 +195,33 @@ export type DirectiveResolvers<ContextType = any> = {
  * Use "DirectiveResolvers" root object instead. If you wish to get "IDirectiveResolvers", add "typesPrefix: I" to your config.
  */
 export type IDirectiveResolvers<ContextType = any> = DirectiveResolvers<ContextType>;
+
+type ResolverResult =
+  | DataField
+  | (DataFields & { __typename?: string })
+  | null
+  | undefined;
+
+export type GraphCacheResolver<ParentData = Data, ResolverVariables = Variables> = (
+  parent: ParentData,
+  args: ResolverVariables,
+  cache: Cache,
+  info: ResolveInfo
+) => ResolverResult;
+
+export type GraphCacheUpdateResolver<ResultData = Data, UpdateVariables = Variables> = (
+  result: ResultData,
+  args: UpdateVariables,
+  cache: Cache,
+  info: ResolveInfo
+) => void;
+
+export type GraphCacheOptimisticMutationResolver<ResultData = Data, UpdateVariables = Variables> = (
+  vars: UpdateVariables,
+  cache: Cache,
+  info: ResolveInfo
+) => null | ResultData | NullArray<ResultData>;
+
 
 export type GraphCacheKeysConfig = {
   Todo: (data: Todo) => null | string
