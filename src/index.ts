@@ -87,7 +87,7 @@ function getResolversConfig(schema: GraphQLSchema) {
     parentType.astNode.fields.forEach(function (field) {
       const argsName = field.arguments && field.arguments.length ? `${parentType.name}${capitalize(field.name.value)}Args` : 'null';
       const type = unwrapType(field.type); 
-      fields.push(`${field.name.value}?: Resolver<${parentType.name}, ${constructType(type)}, ${argsName}>`);
+      fields.push(`${field.name.value}?: GraphCacheResolver<${parentType.name}, ${constructType(type)}, ${argsName}>`);
     });
 
     resolvers.push(`${parentType.name}?: {
@@ -139,7 +139,8 @@ function getOptimisticUpdatersConfig(typemap: TypeMap, mutationName: string) {
     const { fields } = mutationType.astNode;
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
-      optimistic.push(`${fieldNode.name.value}?: GraphCacheOptimisticMutationResolver<${argsName}>`);
+      const type = unwrapType(fieldNode.type); 
+      optimistic.push(`${fieldNode.name.value}?: GraphCacheOptimisticMutationResolver<${constructType(type)}, ${argsName}>`);
     });
   }
 
