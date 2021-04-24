@@ -429,7 +429,7 @@ export type GraphCacheOptimisticUpdaters = {
   updateMedia?: GraphCacheOptimisticMutationResolver<MutationUpdateMediaArgs>
 }
 export type GraphCacheUpdaters = {
-  Mutation?: {
+  Mutation: {
     toggleTodo?: GraphCacheUpdateResolver<Todo, MutationToggleTodoArgs>
     toggleTodos?: GraphCacheUpdateResolver<Array<Todo>, MutationToggleTodosArgs>
     toggleTodosOptionalArray?: GraphCacheUpdateResolver<Maybe<Array<Todo>>, MutationToggleTodosOptionalArrayArgs>
@@ -437,4 +437,5 @@ export type GraphCacheUpdaters = {
     toggleTodosOptional?: GraphCacheUpdateResolver<Maybe<Array<Maybe<Todo>>>, MutationToggleTodosOptionalArgs>
     updateMedia?: GraphCacheUpdateResolver<Maybe<Media>, MutationUpdateMediaArgs>
   }
+  Subscription: object
 }

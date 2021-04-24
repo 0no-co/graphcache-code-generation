@@ -178,11 +178,12 @@ export const plugin: PluginFunction<
   ${optimisticUpdaters.join('\n  ')}
 }`,
       mutationName || subscriptionsName ? `export type GraphCacheUpdaters = {
-  ${mutationName ? `Mutation?: {
+  Mutation: ${mutationName ? `{
     ${mutationUpdaters.join('\n    ')}
-  }` : ''}${subscriptionsName ? `Subscription?: {
+  }` : 'object'}
+  Subscription: ${subscriptionsName ? `{
     ${subscriptionUpaters.join('\n    ')}
-  }` : ''}
+  }` : 'object'}
 }` : null,
     ].filter(Boolean).join('\n'),
   };
