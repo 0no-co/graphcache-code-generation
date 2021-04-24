@@ -26,6 +26,8 @@ const typeDefs = gql`
     todos: [Todo]
     messages: [String]
     messagesPaginated(from: Int! limit: Int!): [String]
+    media: Media
+    schoolBooks: [CoolBook]
   }
 
   type Mutation {
@@ -34,6 +36,20 @@ const typeDefs = gql`
     toggleTodosOptionalArray(id: [ID!]!): [Todo!]
     toggleTodosOptionalEntity(id: [ID!]!): [Todo]!
     toggleTodosOptional(id: [ID!]!): [Todo]
+    updateMedia(id: ID!): Media
+  }
+
+  interface CoolBook {
+    id: ID
+    title: String
+    author: Author
+  }
+
+  type Textbook implements CoolBook {
+    id: ID
+    title: String
+    author: Author
+    todo: Todo
   }
 
   type Author {
@@ -49,9 +65,35 @@ const typeDefs = gql`
     complete: Boolean
     author: Author
   }
+
+  union Media = Book | Movie
+
+  
+  type Book {
+    id: ID
+    title: String
+    pages: Int
+  }
+
+  type Movie {
+    id: ID
+    title: String
+    duration: Int
+  }
 `;
 
 const resolvers = {
+  Media: {
+    __resolveType(obj, context, info){
+      if(obj.name){
+        return 'Author';
+      }
+      if(obj.title){
+        return 'Book';
+      }
+      return null; // GraphQLError is thrown
+    },
+  },
   Query: {
     todos: () => store.todos,
     messages: () => store.messages,
