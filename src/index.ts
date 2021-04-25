@@ -8,7 +8,7 @@ import {
 } from "graphql";
 import { TypeMap } from "graphql/type/schema";
 import { UrqlGraphCacheConfig } from "./config";
-import { baseTypes, legacyImports, legacyWrapper } from './constants';
+import { baseTypes, imports } from './constants';
 
 type GraphQLFlatType = Exclude<TypeNode, GraphQLWrappingType>;
 
@@ -87,7 +87,7 @@ function getResolversConfig(schema: GraphQLSchema) {
     parentType.astNode.fields.forEach(function (field) {
       const argsName = field.arguments && field.arguments.length ? `${parentType.name}${capitalize(field.name.value)}Args` : 'null';
       const type = unwrapType(field.type); 
-      fields.push(`${field.name.value}?: GraphCacheResolver<${parentType.name}, ${constructType(type)}, ${argsName}>`);
+      fields.push(`${field.name.value}?: GraphCacheResolver<${parentType.name}, ${argsName}, ${constructType(type)}>`);
     });
 
     resolvers.push(`${parentType.name}?: {
@@ -140,7 +140,7 @@ function getOptimisticUpdatersConfig(typemap: TypeMap, mutationName: string) {
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
       const type = unwrapType(fieldNode.type); 
-      optimistic.push(`${fieldNode.name.value}?: GraphCacheOptimisticMutationResolver<${constructType(type)}, ${argsName}>`);
+      optimistic.push(`${fieldNode.name.value}?: GraphCacheOptimisticMutationResolver<${argsName}, ${constructType(type)}>`);
     });
   }
 
@@ -168,9 +168,8 @@ export const plugin: PluginFunction<
   }
 
   return {
-    prepend: [legacyImports],
+    prepend: [imports],
     content: [
-      legacyWrapper,
       keys,
       `export type GraphCacheResolvers = {
   ${resolvers.join('\n  ')}

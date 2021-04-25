@@ -1265,9 +1265,9 @@
     "@graphql-typed-document-node/core" "^3.1.0"
     wonka "^4.0.14"
 
-"@urql/exchange-graphcache@https://pkg.csb.dev/FormidableLabs/urql/commit/f9addd08/@urql/exchange-graphcache":
+"@urql/exchange-graphcache@https://pkg.csb.dev/FormidableLabs/urql/commit/6455ba91/@urql/exchange-graphcache":
   version "4.0.0"
-  resolved "https://pkg.csb.dev/FormidableLabs/urql/commit/f9addd08/@urql/exchange-graphcache#51b54c70f5dc3c86750612dc08598e29a10927e7"
+  resolved "https://pkg.csb.dev/FormidableLabs/urql/commit/6455ba91/@urql/exchange-graphcache#d510b43ada21078929ffa9261c89ee1cc0af3625"
   dependencies:
     "@urql/core" ">=2.0.0"
     wonka "^4.0.14"
