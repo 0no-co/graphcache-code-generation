@@ -28,7 +28,7 @@ function constructType(typeNode: TypeNode, nullable: boolean = true): string {
       return nullable ? `Maybe<Array<${constructType(typeNode.type)}>>` : `Array<${constructType(typeNode.type)}>`
     }
     case 'NamedType': {
-      const type = baseTypes.includes(typeNode.name.value) ? `Scalars['${typeNode.name.value}']` : typeNode.name.value;
+      const type = baseTypes.includes(typeNode.name.value) ? `Scalars['${typeNode.name.value}']` : `RequireFields<${typeNode.name.value}, '__typename'>`;
       return nullable ? `Maybe<${type}>` : type;
     }
     case 'NonNullType': {
@@ -170,6 +170,7 @@ export const plugin: PluginFunction<
   return {
     prepend: [imports],
     content: [
+      `export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };`,
       keys,
       `export type GraphCacheResolvers = {
   ${resolvers.join('\n  ')}
