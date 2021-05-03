@@ -147,6 +147,15 @@ function getOptimisticUpdatersConfig(typemap: TypeMap, mutationName: string) {
   return optimistic;
 }
 
+function createCacheGeneric() {
+  return `export type GraphCacheConfig = {
+  updates: GraphCacheUpdaters;
+  keys: GraphCacheKeysConfig;
+  optimistic: GraphCacheOptimisticUpdaters;
+  resolvers: GraphCacheResolvers;
+}`
+}
+
 export const plugin: PluginFunction<
   UrqlGraphCacheConfig,
   Types.ComplexPluginOutput
@@ -186,6 +195,7 @@ export const plugin: PluginFunction<
     ${subscriptionUpaters.join('\n    ')}
   }` : 'object'}
 }` : null,
+      createCacheGeneric()
     ].filter(Boolean).join('\n'),
   };
 };

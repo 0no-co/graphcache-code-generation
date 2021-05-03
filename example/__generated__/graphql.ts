@@ -194,3 +194,9 @@ export type GraphCacheUpdaters = {
   }
   Subscription: object
 }
+export type GraphCacheConfig = {
+  updates: GraphCacheUpdaters;
+  keys: GraphCacheKeysConfig;
+  optimistic: GraphCacheOptimisticUpdaters;
+  resolvers: GraphCacheResolvers;
+}
