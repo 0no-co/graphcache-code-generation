@@ -1,13 +1,8 @@
 import { withUrqlClient } from "next-urql";
 import { cacheExchange } from "@urql/exchange-graphcache";
-import { GraphCacheKeysConfig, GraphCacheOptimisticUpdaters, GraphCacheUpdaters, GraphCacheResolvers } from '../../__generated__/graphql';
+import { GraphCacheConfig } from '../../__generated__/graphql';
 
-const cache = cacheExchange<
-  GraphCacheUpdaters,
-  GraphCacheResolvers,
-  GraphCacheOptimisticUpdaters,
-  GraphCacheKeysConfig
->({
+const cache = cacheExchange<GraphCacheConfig>({
   keys: {
     Author : (data) => data.name,
   },
