@@ -28,7 +28,7 @@ function constructType(typeNode: TypeNode, nullable: boolean = true): string {
       return nullable ? `Maybe<Array<${constructType(typeNode.type)}>>` : `Array<${constructType(typeNode.type)}>`
     }
     case 'NamedType': {
-      const type = baseTypes.includes(typeNode.name.value) ? `Scalars['${typeNode.name.value}']` : `RequireFields<${typeNode.name.value}, '__typename'>`;
+      const type = baseTypes.includes(typeNode.name.value) ? `Scalars['${typeNode.name.value}']` : `${typeNode.name.value}`;
       return nullable ? `Maybe<${type}>` : type;
     }
     case 'NonNullType': {

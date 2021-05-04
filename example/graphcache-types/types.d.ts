@@ -92,7 +92,7 @@ export interface ResolverConfig {
         [fieldName: string]: Resolver;
     };
 }
-export declare type UpdateResolver<Result = Data, Args = Variables> = (result: Result, args: Args, cache: Cache, info: ResolveInfo) => void;
+export declare type UpdateResolver<Result = Data | Data[], Args = Variables> = (result: Result, args: Args, cache: Cache, info: ResolveInfo) => void;
 export declare type KeyGenerator = (data: Data) => null | string;
 export interface UpdatesConfig {
     Mutation: {
