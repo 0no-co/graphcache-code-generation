@@ -107,8 +107,7 @@ function getSubscriptionUpdatersConfig(typemap: TypeMap, subscriptionName: strin
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
       const type = unwrapType(fieldNode.type);
-
-      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<${constructType(type)}, ${argsName}>`);
+      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<{ ${fieldNode.name.value}: ${constructType(type)} }, ${argsName}>`);
     });
   }
 
@@ -124,7 +123,7 @@ function getMutationUpdaterConfig(typemap: TypeMap, mutationName: string) {
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
       const type = unwrapType(fieldNode.type); 
-      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<${constructType(type)}, ${argsName}>`);
+      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<{ ${fieldNode.name.value}: ${constructType(type)} }, ${argsName}>`);
     });
   }
 

@@ -185,12 +185,12 @@ export type GraphCacheOptimisticUpdaters = {
 }
 export type GraphCacheUpdaters = {
   Mutation: {
-    toggleTodo?: GraphCacheUpdateResolver<Todo, MutationToggleTodoArgs>
-    toggleTodos?: GraphCacheUpdateResolver<Array<Todo>, MutationToggleTodosArgs>
-    toggleTodosOptionalArray?: GraphCacheUpdateResolver<Maybe<Array<Todo>>, MutationToggleTodosOptionalArrayArgs>
-    toggleTodosOptionalEntity?: GraphCacheUpdateResolver<Array<Maybe<Todo>>, MutationToggleTodosOptionalEntityArgs>
-    toggleTodosOptional?: GraphCacheUpdateResolver<Maybe<Array<Maybe<Todo>>>, MutationToggleTodosOptionalArgs>
-    updateMedia?: GraphCacheUpdateResolver<Maybe<Media>, MutationUpdateMediaArgs>
+    toggleTodo?: GraphCacheUpdateResolver<{ toggleTodo: Todo }, MutationToggleTodoArgs>
+    toggleTodos?: GraphCacheUpdateResolver<{ toggleTodos: Array<Todo> }, MutationToggleTodosArgs>
+    toggleTodosOptionalArray?: GraphCacheUpdateResolver<{ toggleTodosOptionalArray: Maybe<Array<Todo>> }, MutationToggleTodosOptionalArrayArgs>
+    toggleTodosOptionalEntity?: GraphCacheUpdateResolver<{ toggleTodosOptionalEntity: Array<Maybe<Todo>> }, MutationToggleTodosOptionalEntityArgs>
+    toggleTodosOptional?: GraphCacheUpdateResolver<{ toggleTodosOptional: Maybe<Array<Maybe<Todo>>> }, MutationToggleTodosOptionalArgs>
+    updateMedia?: GraphCacheUpdateResolver<{ updateMedia: Maybe<Media> }, MutationUpdateMediaArgs>
   }
   Subscription: object
 }
