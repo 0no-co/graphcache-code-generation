@@ -83,16 +83,14 @@ export interface Cache {
     /** link() can be used to update a given entity field to link to another entity or entities */
     link(entity: Entity, field: string, value: Link<Entity>): void;
 }
-declare type ResolverResult = DataField | (DataFields & {
-    __typename?: string;
-}) | null | undefined;
+declare type ResolverResult = Entity | DataFields | DataField | null | undefined | Array<ResolverResult>;
 export declare type Resolver<ParentData = Data, Args = Variables, Result = ResolverResult> = (parent: ParentData, args: Args, cache: Cache, info: ResolveInfo) => Result;
 export interface ResolverConfig {
     [typeName: string]: {
         [fieldName: string]: Resolver;
     };
 }
-export declare type UpdateResolver<Result = Data | Data[], Args = Variables> = (result: Result, args: Args, cache: Cache, info: ResolveInfo) => void;
+export declare type UpdateResolver<ParentData = DataFields, Args = Variables> = (parent: ParentData, args: Args, cache: Cache, info: ResolveInfo) => void;
 export declare type KeyGenerator = (data: Data) => null | string;
 export interface UpdatesConfig {
     Mutation: {

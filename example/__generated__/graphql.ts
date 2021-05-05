@@ -131,68 +131,68 @@ export type Todo = {
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 
 export type GraphCacheKeysConfig = {
-  Author?: (data: Author) => null | string
-  Book?: (data: Book) => null | string
-  Movie?: (data: Movie) => null | string
-  Textbook?: (data: Textbook) => null | string
-  Todo?: (data: Todo) => null | string
+  Author?: (data: RequireFields<Author, '__typename'>) => null | string
+  Book?: (data: RequireFields<Book, '__typename'>) => null | string
+  Movie?: (data: RequireFields<Movie, '__typename'>) => null | string
+  Textbook?: (data: RequireFields<Textbook, '__typename'>) => null | string
+  Todo?: (data: RequireFields<Todo, '__typename'>) => null | string
 }
   
 export type GraphCacheResolvers = {
   Author?: {
-    id?: GraphCacheResolver<Author, null, Maybe<Scalars['ID']>>
-    name?: GraphCacheResolver<Author, null, Maybe<Scalars['String']>>
-    friends?: GraphCacheResolver<Author, null, Maybe<Array<Maybe<Author>>>>
-    friendsPaginated?: GraphCacheResolver<Author, AuthorFriendsPaginatedArgs, Maybe<Array<Maybe<Author>>>>
+    id?: GraphCacheResolver<RequireFields<Author, '__typename'>, null, Scalars['ID']>
+    name?: GraphCacheResolver<RequireFields<Author, '__typename'>, null, Scalars['String']>
+    friends?: GraphCacheResolver<RequireFields<Author, '__typename'>, null, Array<RequireFields<Author, '__typename'> | string>>
+    friendsPaginated?: GraphCacheResolver<RequireFields<Author, '__typename'>, AuthorFriendsPaginatedArgs, Array<RequireFields<Author, '__typename'> | string>>
   }
   Book?: {
-    id?: GraphCacheResolver<Book, null, Maybe<Scalars['ID']>>
-    title?: GraphCacheResolver<Book, null, Maybe<Scalars['String']>>
-    pages?: GraphCacheResolver<Book, null, Maybe<Scalars['Int']>>
+    id?: GraphCacheResolver<RequireFields<Book, '__typename'>, null, Scalars['ID']>
+    title?: GraphCacheResolver<RequireFields<Book, '__typename'>, null, Scalars['String']>
+    pages?: GraphCacheResolver<RequireFields<Book, '__typename'>, null, Scalars['Int']>
   }
   Movie?: {
-    id?: GraphCacheResolver<Movie, null, Maybe<Scalars['ID']>>
-    title?: GraphCacheResolver<Movie, null, Maybe<Scalars['String']>>
-    duration?: GraphCacheResolver<Movie, null, Maybe<Scalars['Int']>>
+    id?: GraphCacheResolver<RequireFields<Movie, '__typename'>, null, Scalars['ID']>
+    title?: GraphCacheResolver<RequireFields<Movie, '__typename'>, null, Scalars['String']>
+    duration?: GraphCacheResolver<RequireFields<Movie, '__typename'>, null, Scalars['Int']>
   }
   Query?: {
-    todos?: GraphCacheResolver<Query, null, Maybe<Array<Maybe<Todo>>>>
-    messages?: GraphCacheResolver<Query, null, Maybe<Array<Maybe<Scalars['String']>>>>
-    messagesPaginated?: GraphCacheResolver<Query, QueryMessagesPaginatedArgs, Maybe<Array<Maybe<Scalars['String']>>>>
-    media?: GraphCacheResolver<Query, null, Maybe<Media>>
-    schoolBooks?: GraphCacheResolver<Query, null, Maybe<Array<Maybe<CoolBook>>>>
+    todos?: GraphCacheResolver<RequireFields<Query, '__typename'>, null, Array<RequireFields<Todo, '__typename'> | string>>
+    messages?: GraphCacheResolver<RequireFields<Query, '__typename'>, null, Array<Scalars['String']>>
+    messagesPaginated?: GraphCacheResolver<RequireFields<Query, '__typename'>, QueryMessagesPaginatedArgs, Array<Scalars['String']>>
+    media?: GraphCacheResolver<RequireFields<Query, '__typename'>, null, RequireFields<Media, '__typename'> | string>
+    schoolBooks?: GraphCacheResolver<RequireFields<Query, '__typename'>, null, Array<RequireFields<CoolBook, '__typename'> | string>>
   }
   Textbook?: {
-    id?: GraphCacheResolver<Textbook, null, Maybe<Scalars['ID']>>
-    title?: GraphCacheResolver<Textbook, null, Maybe<Scalars['String']>>
-    author?: GraphCacheResolver<Textbook, null, Maybe<Author>>
-    todo?: GraphCacheResolver<Textbook, null, Maybe<Todo>>
+    id?: GraphCacheResolver<RequireFields<Textbook, '__typename'>, null, Scalars['ID']>
+    title?: GraphCacheResolver<RequireFields<Textbook, '__typename'>, null, Scalars['String']>
+    author?: GraphCacheResolver<RequireFields<Textbook, '__typename'>, null, RequireFields<Author, '__typename'> | string>
+    todo?: GraphCacheResolver<RequireFields<Textbook, '__typename'>, null, RequireFields<Todo, '__typename'> | string>
   }
   Todo?: {
-    id?: GraphCacheResolver<Todo, null, Maybe<Scalars['ID']>>
-    text?: GraphCacheResolver<Todo, null, Maybe<Scalars['String']>>
-    complete?: GraphCacheResolver<Todo, null, Maybe<Scalars['Boolean']>>
-    author?: GraphCacheResolver<Todo, null, Maybe<Author>>
+    id?: GraphCacheResolver<RequireFields<Todo, '__typename'>, null, Scalars['ID']>
+    text?: GraphCacheResolver<RequireFields<Todo, '__typename'>, null, Scalars['String']>
+    complete?: GraphCacheResolver<RequireFields<Todo, '__typename'>, null, Scalars['Boolean']>
+    author?: GraphCacheResolver<RequireFields<Todo, '__typename'>, null, RequireFields<Author, '__typename'> | string>
   }
 }
 export type GraphCacheOptimisticUpdaters = {
-  toggleTodo?: GraphCacheOptimisticMutationResolver<MutationToggleTodoArgs, Todo>
-  toggleTodos?: GraphCacheOptimisticMutationResolver<MutationToggleTodosArgs, Array<Todo>>
-  toggleTodosOptionalArray?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalArrayArgs, Maybe<Array<Todo>>>
-  toggleTodosOptionalEntity?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalEntityArgs, Array<Maybe<Todo>>>
-  toggleTodosOptional?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalArgs, Maybe<Array<Maybe<Todo>>>>
-  updateMedia?: GraphCacheOptimisticMutationResolver<MutationUpdateMediaArgs, Maybe<Media>>
+  toggleTodo?: GraphCacheOptimisticMutationResolver<MutationToggleTodoArgs, RequireFields<Todo, '__typename'>>
+  toggleTodos?: GraphCacheOptimisticMutationResolver<MutationToggleTodosArgs, Array<RequireFields<Todo, '__typename'>>>
+  toggleTodosOptionalArray?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalArrayArgs, Maybe<Array<RequireFields<Todo, '__typename'>>>>
+  toggleTodosOptionalEntity?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalEntityArgs, Array<RequireFields<Todo, '__typename'>>>
+  toggleTodosOptional?: GraphCacheOptimisticMutationResolver<MutationToggleTodosOptionalArgs, Maybe<Array<RequireFields<Todo, '__typename'>>>>
+  updateMedia?: GraphCacheOptimisticMutationResolver<MutationUpdateMediaArgs, Maybe<RequireFields<Media, '__typename'>>>
 }
 export type GraphCacheUpdaters = {
-  Mutation: {
-    toggleTodo?: GraphCacheUpdateResolver<{ toggleTodo: Todo }, MutationToggleTodoArgs>
-    toggleTodos?: GraphCacheUpdateResolver<{ toggleTodos: Array<Todo> }, MutationToggleTodosArgs>
-    toggleTodosOptionalArray?: GraphCacheUpdateResolver<{ toggleTodosOptionalArray: Maybe<Array<Todo>> }, MutationToggleTodosOptionalArrayArgs>
-    toggleTodosOptionalEntity?: GraphCacheUpdateResolver<{ toggleTodosOptionalEntity: Array<Maybe<Todo>> }, MutationToggleTodosOptionalEntityArgs>
-    toggleTodosOptional?: GraphCacheUpdateResolver<{ toggleTodosOptional: Maybe<Array<Maybe<Todo>>> }, MutationToggleTodosOptionalArgs>
-    updateMedia?: GraphCacheUpdateResolver<{ updateMedia: Maybe<Media> }, MutationUpdateMediaArgs>
+  Mutation?: {
+    toggleTodo?: GraphCacheUpdateResolver<{ toggleTodo: RequireFields<Todo, '__typename'> }, MutationToggleTodoArgs>
+    toggleTodos?: GraphCacheUpdateResolver<{ toggleTodos: Array<RequireFields<Todo, '__typename'>> }, MutationToggleTodosArgs>
+    toggleTodosOptionalArray?: GraphCacheUpdateResolver<{ toggleTodosOptionalArray: Maybe<Array<RequireFields<Todo, '__typename'>>> }, MutationToggleTodosOptionalArrayArgs>
+    toggleTodosOptionalEntity?: GraphCacheUpdateResolver<{ toggleTodosOptionalEntity: Array<RequireFields<Todo, '__typename'>> }, MutationToggleTodosOptionalEntityArgs>
+    toggleTodosOptional?: GraphCacheUpdateResolver<{ toggleTodosOptional: Maybe<Array<RequireFields<Todo, '__typename'>>> }, MutationToggleTodosOptionalArgs>
+    updateMedia?: GraphCacheUpdateResolver<{ updateMedia: Maybe<RequireFields<Media, '__typename'>> }, MutationUpdateMediaArgs>
   }
-  Subscription: object
+  Subscription?: {}
 }
 export type GraphCacheConfig = {
   updates: GraphCacheUpdaters;

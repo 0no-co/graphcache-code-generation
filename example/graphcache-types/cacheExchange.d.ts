@@ -9,4 +9,4 @@ export declare type CacheExchangeOpts = {
     schema: IntrospectionData;
     storage: StorageAdapter;
 };
-export declare const cacheExchange: <C extends Partial<CacheExchangeOpts>>(opts?: C | undefined) => Exchange;
+export declare const cacheExchange: <C = CacheExchangeOpts>(opts?: C | undefined) => Exchange;

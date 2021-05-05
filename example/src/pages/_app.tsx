@@ -9,7 +9,7 @@ const cache = cacheExchange<GraphCacheConfig>({
   updates: {
     Mutation: {
       toggleTodo: (result, args, cache, info) => {
-        console.log(result.author.name)
+        console.log(result.toggleTodo.author.name)
       }
     }
   },
@@ -18,7 +18,7 @@ const cache = cacheExchange<GraphCacheConfig>({
       messages: (parent) => parent.messages.map(x => `Message:${x}`),
     },
     Movie: {
-      duration: (parent) => parent.duration.toString(),
+      duration: (parent) => parent.duration + 1,
     }
   },
   optimistic: {

@@ -22,17 +22,17 @@ const unwrapType = (
   return type || null;
 };
 
-function constructType(typeNode: TypeNode, nullable: boolean = true): string {
+function constructType(typeNode: TypeNode, nullable: boolean = true, allowString: boolean = false): string {
   switch(typeNode.kind) {
     case 'ListType': {
-      return nullable ? `Maybe<Array<${constructType(typeNode.type)}>>` : `Array<${constructType(typeNode.type)}>`
+      return nullable ? `Maybe<Array<${constructType(typeNode.type, false, allowString)}>>` : `Array<${constructType(typeNode.type, false, allowString)}>`
     }
     case 'NamedType': {
-      const type = baseTypes.includes(typeNode.name.value) ? `Scalars['${typeNode.name.value}']` : `${typeNode.name.value}`;
+      const type = baseTypes.includes(typeNode.name.value) ? `Scalars['${typeNode.name.value}']` : `RequireFields<${typeNode.name.value}, '__typename'>${allowString ? ' | string' : ''}`;
       return nullable ? `Maybe<${type}>` : type;
     }
     case 'NonNullType': {
-      return constructType(typeNode.type, false)
+      return constructType(typeNode.type, false, allowString)
     }
   }
 }
@@ -57,7 +57,7 @@ function getKeysConfig(schema: GraphQLSchema) {
     const type = typeMap[key];
     if (type.astNode?.kind !== Kind.OBJECT_TYPE_DEFINITION) return;
 
-    keys.push(`${type.name}?: (data: ${type.name}) => null | string`)
+    keys.push(`${type.name}?: (data: RequireFields<${type.name}, '__typename'>) => null | string`)
   });
 
   return `
@@ -87,7 +87,7 @@ function getResolversConfig(schema: GraphQLSchema) {
     parentType.astNode.fields.forEach(function (field) {
       const argsName = field.arguments && field.arguments.length ? `${parentType.name}${capitalize(field.name.value)}Args` : 'null';
       const type = unwrapType(field.type); 
-      fields.push(`${field.name.value}?: GraphCacheResolver<${parentType.name}, ${argsName}, ${constructType(type)}>`);
+      fields.push(`${field.name.value}?: GraphCacheResolver<RequireFields<${parentType.name}, '__typename'>, ${argsName}, ${constructType(type, false, true)}>`);
     });
 
     resolvers.push(`${parentType.name}?: {
@@ -139,7 +139,8 @@ function getOptimisticUpdatersConfig(typemap: TypeMap, mutationName: string) {
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
       const type = unwrapType(fieldNode.type); 
-      optimistic.push(`${fieldNode.name.value}?: GraphCacheOptimisticMutationResolver<${argsName}, ${constructType(type)}>`);
+      const outputType = constructType(type);
+      optimistic.push(`${fieldNode.name.value}?: GraphCacheOptimisticMutationResolver<${argsName}, ${outputType}>`);
     });
   }
 
@@ -187,12 +188,12 @@ export const plugin: PluginFunction<
   ${optimisticUpdaters.join('\n  ')}
 }`,
       mutationName || subscriptionsName ? `export type GraphCacheUpdaters = {
-  Mutation: ${mutationName ? `{
+  Mutation?: ${mutationName ? `{
     ${mutationUpdaters.join('\n    ')}
-  }` : 'object'}
-  Subscription: ${subscriptionsName ? `{
+  }` : '{}'}
+  Subscription?: ${subscriptionsName ? `{
     ${subscriptionUpaters.join('\n    ')}
-  }` : 'object'}
+  }` : '{}'}
 }` : null,
       createCacheGeneric()
     ].filter(Boolean).join('\n'),
