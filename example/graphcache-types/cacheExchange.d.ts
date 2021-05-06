@@ -1,12 +1,9 @@
 import { Exchange } from '@urql/core';
-import { IntrospectionData } from './ast';
-import { StorageAdapter, UpdatesConfig, ResolverConfig, OptimisticMutationConfig, KeyingConfig } from './types';
-export declare type CacheExchangeOpts = {
-    updates: Partial<UpdatesConfig>;
-    resolvers: ResolverConfig;
-    optimistic: OptimisticMutationConfig;
-    keys: KeyingConfig;
-    schema: IntrospectionData;
-    storage: StorageAdapter;
-};
-export declare const cacheExchange: <C extends CacheExchangeOpts>(opts?: C | undefined) => Exchange;
+export declare const cacheExchange: <C extends Partial<Partial<{
+    updates: Partial<import("./types").UpdatesConfig>;
+    resolvers: import("./types").ResolverConfig;
+    optimistic: import("./types").OptimisticMutationConfig;
+    keys: import("./types").KeyingConfig;
+    schema: import("./ast").IntrospectionData;
+    storage: import("./types").StorageAdapter;
+}>>>(opts?: C | undefined) => Exchange;

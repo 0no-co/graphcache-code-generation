@@ -1,5 +1,6 @@
 import { TypedDocumentNode } from '@urql/core';
 import { GraphQLError, DocumentNode, FragmentDefinitionNode } from 'graphql';
+import { IntrospectionData } from './ast';
 export declare type NullArray<T> = Array<null | T | NullArray<T>>;
 export interface Fragments {
     [fragmentName: string]: void | FragmentDefinitionNode;
@@ -83,8 +84,18 @@ export interface Cache {
     /** link() can be used to update a given entity field to link to another entity or entities */
     link(entity: Entity, field: string, value: Link<Entity>): void;
 }
-declare type ResolverResult = (DataFields & { __typename?: string }) | DataField | null | undefined;
-export declare type Resolver<ParentData = Data, Args = Variables, Result = ResolverResult> = (parent: ParentData, args: Args, cache: Cache, info: ResolveInfo) => Result;
+declare type ResolverResult = DataField | (DataFields & {
+    __typename?: string;
+}) | null | undefined;
+export declare type CacheExchangeOpts = Partial<{
+    updates: Partial<UpdatesConfig>;
+    resolvers: ResolverConfig;
+    optimistic: OptimisticMutationConfig;
+    keys: KeyingConfig;
+    schema: IntrospectionData;
+    storage: StorageAdapter;
+}>;
+export declare type Resolver<ParentData = DataFields, Args = Variables, Result = ResolverResult> = (parent: ParentData, args: Args, cache: Cache, info: ResolveInfo) => Result;
 export interface ResolverConfig {
     [typeName: string]: {
         [fieldName: string]: Resolver;

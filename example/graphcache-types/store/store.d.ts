@@ -1,9 +1,8 @@
 import { DocumentNode } from 'graphql';
 import { TypedDocumentNode } from '@urql/core';
-import { Cache, FieldInfo, ResolverConfig, DataField, Variables, FieldArgs, Link, Data, QueryInput, UpdateResolver, OptimisticMutationConfig, KeyingConfig, Entity } from '../types';
+import { Cache, FieldInfo, ResolverConfig, DataField, Variables, FieldArgs, Link, Data, QueryInput, UpdateResolver, OptimisticMutationConfig, KeyingConfig, Entity, CacheExchangeOpts } from '../types';
 import * as InMemoryData from './data';
 import { SchemaIntrospector } from '../ast';
-import { CacheExchangeOpts } from '../cacheExchange';
 declare type RootField = 'query' | 'mutation' | 'subscription';
 export declare class Store<C extends Partial<CacheExchangeOpts> = Partial<CacheExchangeOpts>> implements Cache {
     data: InMemoryData.InMemoryData;
