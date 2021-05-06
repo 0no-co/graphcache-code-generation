@@ -160,7 +160,7 @@ export type GraphCacheResolvers = {
     messages?: GraphCacheResolver<RequireFields<Query, '__typename'>, null, Array<Scalars['String']>>
     messagesPaginated?: GraphCacheResolver<RequireFields<Query, '__typename'>, QueryMessagesPaginatedArgs, Array<Scalars['String']>>
     media?: GraphCacheResolver<RequireFields<Query, '__typename'>, null, RequireFields<Media, '__typename'> | string>
-    schoolBooks?: GraphCacheResolver<RequireFields<Query, '__typename'>, null, Array<RequireFields<CoolBook, '__typename'> | string>>
+    schoolBooks?: GraphCacheResolver<RequireFields<Query, '__typename'>, null, Array<RequireFields<Textbook, '__typename'> | string>>
   }
   Textbook?: {
     id?: GraphCacheResolver<RequireFields<Textbook, '__typename'>, null, Scalars['ID']>

@@ -5,6 +5,7 @@ import {
   Kind,
   GraphQLWrappingType,
   TypeNode,
+  UnionTypeDefinitionNode,
 } from "graphql";
 import { TypeMap } from "graphql/type/schema";
 import { UrqlGraphCacheConfig } from "./config";
@@ -22,17 +23,38 @@ const unwrapType = (
   return type || null;
 };
 
-function constructType(typeNode: TypeNode, nullable: boolean = true, allowString: boolean = false): string {
+function constructType(typeNode: TypeNode, schema: GraphQLSchema, nullable: boolean = true, allowString: boolean = false): string {
   switch(typeNode.kind) {
     case 'ListType': {
-      return nullable ? `Maybe<Array<${constructType(typeNode.type, false, allowString)}>>` : `Array<${constructType(typeNode.type, false, allowString)}>`
+      return nullable ? `Maybe<Array<${constructType(typeNode.type, schema, false, allowString)}>>` : `Array<${constructType(typeNode.type, schema, false, allowString)}>`
     }
     case 'NamedType': {
-      const type = baseTypes.includes(typeNode.name.value) ? `Scalars['${typeNode.name.value}']` : `RequireFields<${typeNode.name.value}, '__typename'>${allowString ? ' | string' : ''}`;
-      return nullable ? `Maybe<${type}>` : type;
+      const type = schema.getType(typeNode.name.value);
+      if (!type.astNode) {
+        return nullable ? `Maybe<Scalars['${typeNode.name.value}']}>` : `Scalars['${typeNode.name.value}']`;
+      }
+
+      switch (type.astNode.kind) {
+        case 'EnumTypeDefinition':
+        case 'UnionTypeDefinition':
+        case 'InputObjectTypeDefinition':
+        case 'ObjectTypeDefinition':
+        case 'ScalarTypeDefinition': {
+          const finalType = `RequireFields<${typeNode.name.value}, '__typename'>${allowString ? ' | string' : ''}`;
+          return nullable ? `Maybe<${finalType}>` : finalType;
+        }
+        case 'InterfaceTypeDefinition': {
+          // @ts-ignore
+          const possibleTypes = schema.getPossibleTypes(type).map(function contruct(x) {
+            return `RequireFields<${x}, '__typename'>`
+          });
+          const finalType = allowString ? possibleTypes.join(' | ') + ' | string' : possibleTypes.join(' | ');
+          return nullable ? `Maybe<${finalType}>` : finalType;
+        }
+      }
     }
     case 'NonNullType': {
-      return constructType(typeNode.type, false, allowString)
+      return constructType(typeNode.type, schema, false, allowString)
     }
   }
 }
@@ -87,7 +109,7 @@ function getResolversConfig(schema: GraphQLSchema) {
     parentType.astNode.fields.forEach(function (field) {
       const argsName = field.arguments && field.arguments.length ? `${parentType.name}${capitalize(field.name.value)}Args` : 'null';
       const type = unwrapType(field.type); 
-      fields.push(`${field.name.value}?: GraphCacheResolver<RequireFields<${parentType.name}, '__typename'>, ${argsName}, ${constructType(type, false, true)}>`);
+      fields.push(`${field.name.value}?: GraphCacheResolver<RequireFields<${parentType.name}, '__typename'>, ${argsName}, ${constructType(type, schema, false, true)}>`);
     });
 
     resolvers.push(`${parentType.name}?: {
@@ -98,48 +120,51 @@ function getResolversConfig(schema: GraphQLSchema) {
   return resolvers;
 }
 
-function getSubscriptionUpdatersConfig(typemap: TypeMap, subscriptionName: string) {
+function getSubscriptionUpdatersConfig(schema: GraphQLSchema, subscriptionName: string) {
   const updaters = [];
-  const subscriptionType = typemap[subscriptionName];
+  const typeMap = schema.getTypeMap();
+  const subscriptionType = typeMap[subscriptionName];
 
   if (subscriptionType.astNode.kind === Kind.OBJECT_TYPE_DEFINITION) {
     const { fields } = subscriptionType.astNode;
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
       const type = unwrapType(fieldNode.type);
-      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<{ ${fieldNode.name.value}: ${constructType(type)} }, ${argsName}>`);
+      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<{ ${fieldNode.name.value}: ${constructType(type, schema)} }, ${argsName}>`);
     });
   }
 
   return updaters;
 }
 
-function getMutationUpdaterConfig(typemap: TypeMap, mutationName: string) {
+function getMutationUpdaterConfig(schema: GraphQLSchema, mutationName: string) {
   const updaters = [];
-  const mutationType = typemap[mutationName];
+  const typeMap = schema.getTypeMap();
+  const mutationType = typeMap[mutationName];
 
   if (mutationType.astNode.kind === Kind.OBJECT_TYPE_DEFINITION) {
     const { fields } = mutationType.astNode;
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
       const type = unwrapType(fieldNode.type); 
-      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<{ ${fieldNode.name.value}: ${constructType(type)} }, ${argsName}>`);
+      updaters.push(`${fieldNode.name.value}?: GraphCacheUpdateResolver<{ ${fieldNode.name.value}: ${constructType(type, schema)} }, ${argsName}>`);
     });
   }
 
   return updaters;
 }
 
-function getOptimisticUpdatersConfig(typemap: TypeMap, mutationName: string) {
+function getOptimisticUpdatersConfig(schema: GraphQLSchema, mutationName: string) {
   const optimistic = [];
-  const mutationType = typemap[mutationName];
+  const typeMap = schema.getTypeMap();
+  const mutationType = typeMap[mutationName];
 
   if (mutationType.astNode.kind === Kind.OBJECT_TYPE_DEFINITION) {
     const { fields } = mutationType.astNode;
     fields.forEach(fieldNode => {
       const argsName = `Mutation${capitalize(fieldNode.name.value)}Args`;
       const type = unwrapType(fieldNode.type); 
-      const outputType = constructType(type);
+      const outputType = constructType(type, schema);
       optimistic.push(`${fieldNode.name.value}?: GraphCacheOptimisticMutationResolver<${argsName}, ${outputType}>`);
     });
   }
@@ -168,12 +193,12 @@ export const plugin: PluginFunction<
   const resolvers = getResolversConfig(schema);
   let mutationUpdaters, subscriptionUpaters, optimisticUpdaters;
   if (mutationName) {
-    mutationUpdaters = getMutationUpdaterConfig(typeMap, mutationName);
-    optimisticUpdaters = getOptimisticUpdatersConfig(typeMap, mutationName);
+    mutationUpdaters = getMutationUpdaterConfig(schema, mutationName);
+    optimisticUpdaters = getOptimisticUpdatersConfig(schema, mutationName);
   }
 
   if (subscriptionsName) {
-    subscriptionUpaters = getSubscriptionUpdatersConfig(typeMap, subscriptionsName);
+    subscriptionUpaters = getSubscriptionUpdatersConfig(schema, subscriptionsName);
   }
 
   return {
